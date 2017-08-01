@@ -32,7 +32,7 @@ class Sabnzbd(object):
         self._config = {} # sabnzbd config.
 
     @asyncio.coroutine
-    def _query(self, mode, method='get', rtype=None, timeout=10, **kwargs):  # TODO handle rtype. just check the reponse rturn True false.
+    def _query(self, mode, method='get', rtype=None, timeout=10, **kwargs):
         kw = kwargs.copy()
         kw.update(self._defaults)
         kw['mode'] = mode
@@ -56,7 +56,11 @@ class Sabnzbd(object):
 
     @asyncio.coroutine
     def reachable(self):
-        return (yield from self._query('auth'))
+        resp = None
+        resp = (yield from self._query('auth'))
+        if resp:
+            return True
+        return False
 
     @asyncio.coroutine
     def queue(self, **kwargs):
@@ -211,35 +215,34 @@ class Sabnzbd(object):
     @asyncio.coroutine
     def add_localfile(self, path, name='', category='*', script='Default', priority=-100, pp=1):
         """Add a local file, sabnzbd must be able to reach the path."""
-
         return (yield from self._query('addlocalfile', name=path, nzbname=name,
                                        cat=category, script=script,
                                        priority=priority, pp=pp))
 
     @asyncio.coroutine
-    def change_job_category(self):
-        pass
-        #api?mode=change_cat&value=NZO_ID&value2=Category
+    def change_job_category(self, nzo, category):
+        """Get the categories from get_cats."""
+        return (yield from self._query('change_cat', value=nzo, value2=category))
 
     @asyncio.coroutine
-    def change_job_script(self):
-        # api?mode=change_cat&value=NZO_ID&value2=script.py
-        pass
+    def change_job_script(self, nzo, script):
+        """Get the script for get_scripts"""
+        return (yield from self._query('change_cat', value=nzo, value2=script))
 
     @asyncio.coroutine
-    def change_job_priority(self):
-        # api?mode=queue&name=priority&value=NZO_ID&value2=0
-        pass
+    def change_job_priority(self, nzo, pos):
+        return (yield from self._query('queue', name='priority',
+                                       value=nzo, value2=pos))
 
     @asyncio.coroutine
-    def change_job_postprocessing(self):
-        # api?mode=change_opts&value=NZO_ID&value2=0
-        pass
+    def change_job_postprocessing(self, nzo, pos):
+        return (yield from self._query('change_pts', value=nzo, value2=pos))
 
     @asyncio.coroutine
-    def change_job_name(self):
+    def change_job_name(self, nzo, name, password=None):
         # api?mode=queue&name=rename&value=NZO_ID&value2=NEW_NAME&value3=PASSWORD
-        pass
+        return (yield from self._query('queue', name='rename', value=nzo,
+                                       value2=name, password=password))
 
     @asyncio.coroutine
     def get_files(self, nzo):
@@ -247,12 +250,12 @@ class Sabnzbd(object):
         return (yield from self._query('get_files', value=nzo))
 
     @asyncio.coroutine
-    def remove_job(self, nzo):
+    def remove_job(self, nzo, nzf):
         """Remove a job from the queue
 
         """
-        # api?mode=queue&name=delete_nzf&value=NZO_ID&value2=NZF_ID
-        pass
+        return (yield from self._query('queue', name='delete', value=nzo,
+                                       value2=nzf))
 
     @asyncio.coroutine
     def delete_history(self, nzo):
@@ -273,27 +276,25 @@ class Sabnzbd(object):
 
     @asyncio.coroutine
     def history(self, start=0, limit=0, category='', search=None, failed=False):
-        # api?mode=history&start=START&limit=LIMIT&category=CATEGORY&search=SEARCH&failed_only=0
         return (yield from self._query('mode', start=start, limit=limit,
                                        category=category, search=search,
                                        failed_only=int(failed)))
 
     @asyncio.coroutine
     def server_stats(self):
-        # Download statistics
+        """Return download statistics in bytes, total and per-server."""
         return (yield from self._query('server_stats'))
 
     @asyncio.coroutine
-    def get_config(self):
-        # api?mode=get_config
-        # api?mode=get_config&section=servers&keyword=ServerName
-        pass
+    def get_config(self, section=None, key=None):
+        if section is None and key is None:
+            return (yield from self._query('get_config'))
+        return (yield from self._query('get_config', section=section, keyword=key))
 
     @asyncio.coroutine
-    def set_config(self):
-        # api?mode=set_config&section=SECTION&keyword=KEYWORD&value=VALUE
-        # api?mode=set_config_default&keyword=SETTING_1&keyword=SETTING_2
-        pass
+    def set_config(self, section=None, key=None, value=None):
+        return (yield from self._query('set_config', section=section,
+                                       keyword=key, value=value))
 
     @asyncio.coroutine
     def warnings(self):
