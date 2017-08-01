@@ -22,13 +22,13 @@ class Sabnzbd(object):
                          response is only parsed for json.
         """
         self._api_key = apikey
-        self._client = client or httpclient
+        self._client = client or httpclient()
         self._output = output
         self._url = url.rstrip('/') + '/sabnzbd/api'
 
         self._defaults = {'output': output,
-                          'apikey': self._api_key
-                        }
+                          'apikey': self._api_key}
+
         self._config = {} # sabnzbd config.
 
     @asyncio.coroutine
@@ -43,12 +43,13 @@ class Sabnzbd(object):
             data = yield from resp.json()
             err = data.get('error')
             if resp.status == 200 and err:
-                raise SabnzbHttpError(err)
+                raise SabnzbdHttpError(err)
+
             return data
 
         elif self._output == 'xml':
             data = yield from resp.text()
-            return ET.fromstring(data)
+            #return ET.fromstring(data)
 
         else:
             return (yield from resp.text())
@@ -134,11 +135,9 @@ class Sabnzbd(object):
     def resume_jobs(self, nzo):
         return (yield from self.queue(name='resume', value=nzo))
 
-    # api?mode=queue&name=delete&value=all&del_files=1
-
     @asyncio.coroutine
     def delete_jobs(self, nzo, delete_files=False):
-        """Remove all jobs from the queue, or only the ones matching search.
+        """Remove a job or all jobs from the queue.
            Returns nzb_id of the jobs removed
 
            Args:
@@ -175,13 +174,136 @@ class Sabnzbd(object):
         """
         return (yield from self._query('switch', value=first, value2=second))
 
+    @asyncio.coroutine
+    def add_url(self, url, name='', category='*', script='Default', priority=-100, pp=1):
+        """Add a nzb via url to sabnzbd
+
+           Args:
+                url(str): url to nzb
+                name (str, optional): Name of the job, if empty the NZB filename is used.
+                                      NOTE If you want to supply a password, it needs to be part
+                                      of the name/nzbname or provided inside the NZB, see: RAR with password.
+
+                category(str, optional): * Means default, you can get a list of categories from get_categories
+                script(str, optional): Sabnzbd will use the default script for the category, get possible scripts from
+                             get_scripts
+                priority(int, optional): -100 = Default Priority (of category)
+                                         -2 = Paused
+                                         -1 = Low Priority
+                                         0 = Normal Priority
+                                         1 = High Priority
+                                         2 = Force
+                pp(int, optional):  Post procesing options
+                                    -1 = Default (of category)
+                                    0 = None
+                                    1 = +Repair
+                                    2 = +Repair/Unpack
+                                    3 = +Repair/Unpack/Delete
+
+
+
+        """
+
+        return (yield from self._query('addurl', name=url, nzbname=name,
+                                       cat=category, script=script,
+                                       priority=priority, pp=pp))
+
+    @asyncio.coroutine
+    def add_localfile(self, path, name='', category='*', script='Default', priority=-100, pp=1):
+        """Add a local file, sabnzbd must be able to reach the path."""
+
+        return (yield from self._query('addlocalfile', name=path, nzbname=name,
+                                       cat=category, script=script,
+                                       priority=priority, pp=pp))
+
+    @asyncio.coroutine
+    def change_job_category(self):
+        pass
+        #api?mode=change_cat&value=NZO_ID&value2=Category
+
+    @asyncio.coroutine
+    def change_job_script(self):
+        # api?mode=change_cat&value=NZO_ID&value2=script.py
+        pass
+
+    @asyncio.coroutine
+    def change_job_priority(self):
+        # api?mode=queue&name=priority&value=NZO_ID&value2=0
+        pass
+
+    @asyncio.coroutine
+    def change_job_postprocessing(self):
+        # api?mode=change_opts&value=NZO_ID&value2=0
+        pass
+
+    @asyncio.coroutine
+    def change_job_name(self):
+        # api?mode=queue&name=rename&value=NZO_ID&value2=NEW_NAME&value3=PASSWORD
+        pass
+
+    @asyncio.coroutine
+    def get_files(self, nzo):
+        """Get all the files for a job."""
+        return (yield from self._query('get_files', value=nzo))
+
+    @asyncio.coroutine
+    def remove_job(self, nzo):
+        """Remove a job from the queue
+
+        """
+        # api?mode=queue&name=delete_nzf&value=NZO_ID&value2=NZF_ID
+        pass
+
+    @asyncio.coroutine
+    def delete_history(self, nzo):
+        """Delete history
+
+           Args:
+                nzo (str, list): a single nzo, a list of nzos, failed or all.
+
+        """
+        return (yield from self._query('history', name='delete', value=nzo))
+
+    @asyncio.coroutine
+    def retry(self, nzo, password=None):
+        if nzo == 'all':
+            return (yield from self._query('retry_all'))
+
+        return (yield from self._query('retry', value=nzo, password=password))
+
+    @asyncio.coroutine
+    def history(self, start=0, limit=0, category='', search=None, failed=False):
+        # api?mode=history&start=START&limit=LIMIT&category=CATEGORY&search=SEARCH&failed_only=0
+        return (yield from self._query('mode', start=start, limit=limit,
+                                       category=category, search=search,
+                                       failed_only=int(failed)))
+
+    @asyncio.coroutine
+    def server_stats(self):
+        # Download statistics
+        return (yield from self._query('server_stats'))
+
+    @asyncio.coroutine
+    def get_config(self):
+        # api?mode=get_config
+        # api?mode=get_config&section=servers&keyword=ServerName
+        pass
+
+    @asyncio.coroutine
+    def set_config(self):
+        # api?mode=set_config&section=SECTION&keyword=KEYWORD&value=VALUE
+        # api?mode=set_config_default&keyword=SETTING_1&keyword=SETTING_2
+        pass
+
+    @asyncio.coroutine
+    def warnings(self):
+        return (yield from self._query('warnings'))
 
 
 
 
-        #mode=config name=set_nzbkey
 
-# https://stackoverflow.com/questions/2352181/how-to-use-a-dot-to-access-members-of-dictionary
+
 
 
 

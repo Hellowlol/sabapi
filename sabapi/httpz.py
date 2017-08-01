@@ -1,5 +1,5 @@
 import asyncio
-import xml.etree.ElementTree as ET
+import logging
 
 import aiohttp
 from async_timeout import timeout
