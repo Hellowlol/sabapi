@@ -17,8 +17,6 @@ def fetch(url, session, params, method='GET', t=10):
             LOG.exception(err)
 
 
-
-
 def httpclient(session=None, connector=None):
     if session is None:
         session = aiohttp.ClientSession(connector=connector, loop=asyncio.get_event_loop())
