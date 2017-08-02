@@ -23,7 +23,7 @@ setup(
     use_scm_version=True,
     setup_requires=['setuptools_scm', 'pypandoc'],
 
-    description='API for NRK, also includes a cli tool to download series or programs from NRK.',
+    description='Simple python wrapper for sabnzbd http api.',
     long_description=README,
 
     # The project's main homepage.
@@ -38,17 +38,17 @@ setup(
 
     # See https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 3 - Alpha',
 
         # Indicate who your project is intended for
         'Intended Audience :: End Users/Desktop',
-        'Environment :: Console',
-        'Topic :: Multimedia :: Video',
 
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
 
         # Specify the Python versions you support here.
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
 
