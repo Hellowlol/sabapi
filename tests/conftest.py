@@ -13,4 +13,4 @@ def client():
 
 @pytest.fixture
 def sab():
-    return Sabnzbd(os.environ.get('sabnzbd_url'), os.environ.get('sabnzbd_apikey'))
+    return Sabnzbd(os.environ.get('sabnzbd_url', ''), os.environ.get('sabnzbd_apikey', ''))
