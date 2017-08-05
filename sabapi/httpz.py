@@ -10,7 +10,7 @@ LOG = logging.getLogger(__name__)
 @asyncio.coroutine
 def fetch(url, session, params, method='GET', t=10):
     with timeout(t):
-        resp = yield from session.request(method, url, params=params)
+        resp = yield from session.request(method.lower(), url, params=params)
         try:
             return resp
         except (asyncio.TimeoutError, aiohttp.ClientError) as err:
