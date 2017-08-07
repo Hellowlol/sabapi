@@ -1,0 +1,64 @@
+{
+    "history": {
+        "total_size": "1.8 T",
+        "day_size": "1.9 G",
+        "noofslots": 1510,
+        "last_history_update": 16656,
+        "week_size": "50.6 G",
+        "version": "2.2.0Beta1",
+        "slots": [{
+            "action_line": "",
+            "series": "Showname/4/9",
+            "show_details": "True",
+            "script_log": "",
+            "meta": null,
+            "fail_message": "",
+            "loaded": false,
+            "id": 1786,
+            "size": "1.0 GB",
+            "category": "tv",
+            "pp": "D",
+            "password": "",
+            "completeness": 0,
+            "script": "nzbToSickBeard.py",
+            "nzb_name": "Showname.S04E09.720p.HDTV.x264-AVS.nzb",
+            "download_time": 95,
+            "storage": "D:\\watchfolder2\\Showname.S04E09.720p.HDTV.x264-AVS",
+            "has_rating": false,
+            "status": "Completed",
+            "script_line": "SickBeard: Successfully post-processed Showname.S04E09.720p.HDTV-AVS.srr!",
+            "completed": 15000000,
+            "nzo_id": "SABnzbd_nzo_qn6xt2",
+            "downloaded": 11400000,
+            "retry": 0,
+            "report": "",
+            "path": "\\\\?\\D:\\sabtemp\\Showname.S04E09.720p.HDTV.x264-AVS",
+            "postproc_time": 61,
+            "name": "Showname.S04E09.720p.HDTV.x264-AVS",
+            "url": "http://althub.co.za/getnzb/1234.nzb&i=124&r=123",
+            "md5sum": "999",
+            "bytes": 11400000,
+            "url_info": "http://althub.co.za/details/1234",
+            "stage_log": [{
+                "name": "Source",
+                "actions": ["http://althub.co.za/getnzb/1234.nzb&i=40521&r=123"]
+            }, {
+                "name": "Download",
+                "actions": ["Downloaded in 1 min 35 seconds at an average of 11.4 MB/s<br/>Age: 22m"]
+            }, {
+                "name": "Servers",
+                "actions": ["url-to-usenetprovider.com=1.1 GB"]
+            }, {
+                "name": "Repair",
+                "actions": ["[Showname.s04e09.720p.hdtv.x264-avs] Quick Check OK"]
+            }, {
+                "name": "Unpack",
+                "actions": ["[Showname.s04e09.720p.hdtv.x264-avs] Unpacked 1 files/folders in 1 sec"]
+            }, {
+                "name": "Script",
+                "actions": ["SickBeard: Successfully post-processed Showname.S04E09.720p.HDTV-AVS.srr! <a href=\"./scriptlog?name=SABnzbd_nzo_qn6xt2\">(More)</a>"]
+            }]
+        }],
+        "month_size": "38.7 G"
+    }
+}

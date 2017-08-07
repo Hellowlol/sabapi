@@ -21,30 +21,59 @@ class Sabnzbd(object):
             output(str): default json. We also allow other but the
                          response is only parsed for json.
         """
+        self.__own_client = False
         self._api_key = apikey
-        self._client = client or httpclient()
         self._output = output
         self._url = url.rstrip('/') + '/sabnzbd/api'
 
         self._defaults = {'output': output,
                           'apikey': self._api_key}
-
+        self._last_call = ''
         self._config = {} # sabnzbd config.
 
+        if client is None:
+            self.__own_client = True
+            self._client = httpclient()
+        else:
+            self._client = client
+
+    def __del__(self):
+        # Only close the _client if the
+        # sabapi created the ClientSession
+        if self.__own_client is True:
+            @asyncio.coroutine
+            def clean_up():
+                yield from self._client.close()
+                del self._client
+                self._client = None
+
+
+            asyncio.ensure_future(clean_up())
+            #asyncio.wait(clean_up())
+
     @asyncio.coroutine
-    def _query(self, mode, method='get', rtype=None, timeout=10, **kwargs):
+    def _query(self, mode, method='get', timeout=10, **kwargs):
         kw = kwargs.copy()
         kw.update(self._defaults)
         kw['mode'] = mode
+
+        # The api expects 1 or 0 for bool
+        clean_kw = {}
+        for k, v in kw.items():
+            if type(v) == bool:
+                v = int(v)
+            clean_kw[k] = v
+
         resp = yield from fetch(self._url, self._client,
-                                t=timeout, params=kw)
+                                t=timeout, params=clean_kw)
+        self._last_call = resp.url
 
         if self._output == 'json':
             data = yield from resp.json()
             err = data.get('error')
             if resp.status == 200 and err:
                 raise SabnzbdHttpError(err)
-
+            #yield from resp.release()
             return data
 
         elif self._output == 'xml':
@@ -92,12 +121,19 @@ class Sabnzbd(object):
         return (yield from self._query('resume'))
 
     @asyncio.coroutine
-    def auth(self): # response need to be handled
+    def auth(self):
         return (yield from self._query('auth'))
 
     @asyncio.coroutine
-    def full_status(self):
-        return (yield from self._query('full_status'))
+    def full_status(self, skip_dashboard=True):
+
+        """Get all status information available from SABnzbd.
+
+           Args:
+                skip_dashboard(bool): Skip getting public IPv4 address
+
+        """
+        return (yield from self._query('fullstatus', skip_dashboard=skip_dashboard))
 
     @asyncio.coroutine
     def pause_postprocessing(self):
@@ -275,10 +311,11 @@ class Sabnzbd(object):
         return (yield from self._query('retry', value=nzo, password=password))
 
     @asyncio.coroutine
-    def history(self, start=0, limit=0, category='', search=None, failed=False):
-        return (yield from self._query('mode', start=start, limit=limit,
+    def history(self, start=0, limit=0, category='', search='', failed=False, last_history_update=False):
+        return (yield from self._query('history', start=start, limit=limit,
                                        category=category, search=search,
-                                       failed_only=int(failed)))
+                                       failed_only=failed,
+                                       last_history_update=last_history_update))
 
     @asyncio.coroutine
     def server_stats(self):
@@ -299,3 +336,7 @@ class Sabnzbd(object):
     @asyncio.coroutine
     def warnings(self):
         return (yield from self._query('warnings'))
+
+    @asyncio.coroutine
+    def version(self):
+        return (yield from self._query('version'))
