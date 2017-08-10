@@ -4,8 +4,7 @@ python:
 before_install:
     - sudo apt-get install pandoc
     - pip install --upgrade pip
-    - pip install codecov
-    - pip install pytest pytest-cov
+    - pip install -U pytest pytest-cov codecov aioresponses
 # command to install dependencies
 install: "python setup.py install"
 script: py.test --ignore=test_integration.py -vv -s --cov=$TRAVIS_BUILD_DIR/sabapi --cov-report term-missing

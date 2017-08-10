@@ -72,6 +72,6 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['pypandoc'],
-        'test': ['pytest', 'codecov', 'pytest-cov'],
+        'test': ['pytest', 'codecov', 'pytest-cov', 'aioresponses'],
     }
 )
