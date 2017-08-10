@@ -47,9 +47,8 @@ class Sabnzbd(object):
                 del self._client
                 self._client = None
 
-
-            asyncio.ensure_future(clean_up())
-            #asyncio.wait(clean_up())
+            l = asyncio.get_event_loop()
+            l.run_until_complete(clean_up())
 
     @asyncio.coroutine
     def _query(self, mode, method='get', timeout=10, **kwargs):
