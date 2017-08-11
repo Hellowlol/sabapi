@@ -1,6 +1,7 @@
 
 import os
 from setuptools import setup, find_packages
+import sys
 
 # Possibly convert the README.md to .rst-format
 try:
@@ -12,6 +13,10 @@ except ImportError:
 
 
 REQ = ['aiohttp']
+
+# Just needed for the tests. Should be fixed in aioresponses
+if sys.version_info < (3, 5):
+    REQ.append('typing')
 
 
 setup(
